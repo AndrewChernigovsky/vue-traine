@@ -1,3 +1,7 @@
 {
+<<<<<<< HEAD
   "recommendations": ["Vue.volar", "Vue.vscode-typescript-vue-plugin"]
+=======
+  "recommendations": ["Vue.volar"]
+>>>>>>> bb4a92553296f2943235d1ceb31d5fa5dd87ebf7
 }

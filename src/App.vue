@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <template>
 	<div class="app">
 		<h1>Page Posts</h1>
@@ -87,3 +88,11 @@ export default {
 	justify-content: space-between;
 }
 </style>
+=======
+<script setup>
+</script>
+
+<template>
+
+</template>
+>>>>>>> bb4a92553296f2943235d1ceb31d5fa5dd87ebf7
