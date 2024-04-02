@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <template>
 	<div class="app">
 		<h1>Page Posts</h1>
@@ -7,7 +6,7 @@
 			<my-dialog v-model:show="dialogVisible">
 				<post-form @create="createPost" />
 			</my-dialog>
-			<my-select v-model="selectedSort" :options="sortOptions"></my-select>
+			<my-select v-model="selectedSort" :options="sortOptions" />
 		</div>
 		<post-list :posts="posts" @remove="removePost" v-if="!isPostLoading" />
 		<div v-else>Loading...</div>
@@ -67,6 +66,18 @@ export default {
 	},
 	mounted() {
 		this.fetchPosts();
+	},
+	watch: {
+		selectedSort(newValue) {
+			console.log(this.posts, 'posts');
+			this.posts.sort((post1, post2) => {
+				return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])
+			})
+			console.log(newValue)
+		},
+		dialogVisible(newValue) {
+			console.log(newValue);
+		}
 	}
 }
 
@@ -88,11 +99,3 @@ export default {
 	justify-content: space-between;
 }
 </style>
-=======
-<script setup>
-</script>
-
-<template>
-
-</template>
->>>>>>> bb4a92553296f2943235d1ceb31d5fa5dd87ebf7
