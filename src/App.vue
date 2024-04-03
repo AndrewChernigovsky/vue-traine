@@ -1,16 +1,22 @@
 <template>
-	<div class="app">
-		<h1>Page Posts</h1>
-		<div class="app__btns">
-			<my-button @click="showDialog">Create Post</my-button>
-			<my-dialog v-model:show="dialogVisible">
-				<post-form @create="createPost" />
-			</my-dialog>
-			<my-select v-model="selectedSort" :options="sortOptions" />
-		</div>
-		<post-list :posts="posts" @remove="removePost" v-if="!isPostLoading" />
-		<div v-else>Loading...</div>
-	</div>
+  <div class="app">
+    <h1>Page Posts</h1>
+    <my-input v-model="searchQuery" placeholder="Search..."></my-input>
+    <div class="app__btns">
+      <my-button @click="showDialog">Create Post</my-button>
+      <my-dialog v-model:show="dialogVisible">
+        <post-form @create="createPost" />
+      </my-dialog>
+      <my-select v-model="selectedSort" :options="sortOptions" />
+    </div>
+    <post-list :posts="sortedAndSearchPosts" @remove="removePost" v-if="!isPostLoading" />
+    <div v-else>Loading...</div>
+    <div class="page__wrapper">
+      <div v-for="pageNumber in  totalPages " :key="pageNumber" class="page" :class="{
+      'current-page': page === pageNumber
+    }" @click="changePage(pageNumber)">{{ pageNumber }}</div>
+    </div>
+  </div>
 
 </template>
 
@@ -20,82 +26,109 @@ import PostList from "@/components/PostList.vue";
 import axios from "axios";
 
 export default {
-	components: {
-		PostForm,
-		PostList
-	},
-	data() {
-		return {
-			posts: [],
-			dialogVisible: false,
-			isPostLoading: false,
-			selectedSort: '',
-			sortOptions: [
-				{
-					value: 'title', name: 'about name',
-				},
-				{
-					value: 'body', name: 'about description'
-				}
-			]
-		}
-	},
-	methods: {
-		createPost(post) {
-			this.posts.push(post);
-			this.dialogVisible = false;
-		},
-		removePost(post) {
-			this.posts = this.posts.filter(p => p.id !== post.id);
-		},
-		showDialog() {
-			this.dialogVisible = true;
-		},
-		async fetchPosts() {
-			try {
-				this.isPostLoading = true;
-				const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10');
-				this.posts = response.data;
-			} catch (e) {
-				alert('Error')
-				console.log(e);
-			} finally {
-				this.isPostLoading = false;
-			}
-		}
-	},
-	mounted() {
-		this.fetchPosts();
-	},
-	watch: {
-		selectedSort(newValue) {
-			console.log(this.posts, 'posts');
-			this.posts.sort((post1, post2) => {
-				return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])
-			})
-			console.log(newValue)
-		},
-		dialogVisible(newValue) {
-			console.log(newValue);
-		}
-	}
+  components: {
+    PostForm,
+    PostList
+  },
+  data() {
+    return {
+      posts: [],
+      dialogVisible: false,
+      isPostLoading: false,
+      selectedSort: '',
+      searchQuery: '',
+      page: 1,
+      limit: 10,
+      totalPages: 0,
+      sortOptions: [
+        {
+          value: 'title', name: 'about name',
+        },
+        {
+          value: 'body', name: 'about description'
+        }
+      ]
+    }
+  },
+  methods: {
+    createPost(post) {
+      this.posts.push(post);
+      this.dialogVisible = false;
+    },
+    removePost(post) {
+      this.posts = this.posts.filter(p => p.id !== post.id);
+    },
+    showDialog() {
+      this.dialogVisible = true;
+    },
+    changePage(pageNumber) {
+      this.page = pageNumber;
+      this.fetchPosts();
+    },
+    async fetchPosts() {
+      try {
+        this.isPostLoading = true;
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+          params: {
+            _page: this.page,
+            _limit: this.limit
+          }
+        });
+        this.totalPages = Math.ceil(response.headers['x-total-count'] / this.limit);
+        this.posts = response.data;
+      } catch (e) {
+        alert('Error')
+        console.log(e);
+      } finally {
+        this.isPostLoading = false;
+      }
+    }
+  },
+  mounted() {
+    this.fetchPosts();
+  },
+  computed: {
+    sortedPosts() {
+      return [...this.posts].sort((post1, post2) => post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]))
+    },
+    sortedAndSearchPosts() {
+      return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLocaleLowerCase()))
+    }
+  },
+  watch: {
+
+  }
 }
 
 </script>
 
 <style>
 * {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .app {
-	padding: 20px;
+  padding: 20px;
 }
 
 .app__btns {
-	display: flex;
-	justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
+}
+
+.page__wrapper {
+  display: flex;
+  margin-top: 15px;
+}
+
+.page {
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.current-page {
+  border: 1px solid red;
 }
 </style>
