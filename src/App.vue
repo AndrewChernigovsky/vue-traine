@@ -11,11 +11,12 @@
     </div>
     <post-list :posts="sortedAndSearchPosts" @remove="removePost" v-if="!isPostLoading" />
     <div v-else>Loading...</div>
-    <div class="page__wrapper">
+    <div class="observer" ref="observer"></div>
+    <!-- <div class="page__wrapper">
       <div v-for="pageNumber in  totalPages " :key="pageNumber" class="page" :class="{
       'current-page': page === pageNumber
     }" @click="changePage(pageNumber)">{{ pageNumber }}</div>
-    </div>
+    </div> -->
   </div>
 
 </template>
@@ -61,10 +62,9 @@ export default {
     showDialog() {
       this.dialogVisible = true;
     },
-    changePage(pageNumber) {
-      this.page = pageNumber;
-      this.fetchPosts();
-    },
+    // changePage(pageNumber) {
+    //   this.page = pageNumber;
+    // },
     async fetchPosts() {
       try {
         this.isPostLoading = true;
@@ -82,10 +82,39 @@ export default {
       } finally {
         this.isPostLoading = false;
       }
-    }
+    },
+    async loadMorePosts() {
+      try {
+        this.page += 1;
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+          params: {
+            _page: this.page,
+            _limit: this.limit
+          }
+        });
+        this.totalPages = Math.ceil(response.headers['x-total-count'] / this.limit);
+        this.posts = [...this.posts, ...response.data];
+      } catch (e) {
+        alert('Error')
+        console.log(e);
+      }
+    },
   },
   mounted() {
     this.fetchPosts();
+    console.log(this.$refs.observer, '11');
+    const options = {
+      rootMargin: '0px',
+      threshold: 1.0
+    };
+    const cb = (enrties, observer) => {
+      // console.log(enrties, 'rrere');
+      if (enrties[0].isIntersecting && this.page < this.totalPages) {
+        this.loadMorePosts();
+      }
+    };
+    const observer = new IntersectionObserver(cb, options);
+    observer.observe(this.$refs.observer);
   },
   computed: {
     sortedPosts() {
@@ -96,7 +125,9 @@ export default {
     }
   },
   watch: {
-
+    // page() {
+    //   this.fetchPosts();
+    // }
   }
 }
 
@@ -130,5 +161,10 @@ export default {
 
 .current-page {
   border: 1px solid red;
+}
+
+.observer {
+  height: 30px;
+  background: green;
 }
 </style>
