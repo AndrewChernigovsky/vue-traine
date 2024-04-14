@@ -1,6 +1,7 @@
 <template>
   <div class="app">
     <h1>Page Posts</h1>
+    <BaseButton :class="'bg-green-200'">sdfsdf</BaseButton>
     <my-input v-model="searchQuery" placeholder="Search..."></my-input>
     <div class="app__btns">
       <my-button @click="showDialog">Create Post</my-button>
@@ -17,6 +18,7 @@
       'current-page': page === pageNumber
     }" @click="changePage(pageNumber)">{{ pageNumber }}</div>
     </div> -->
+    <!-- 11 -->
   </div>
 
 </template>
@@ -25,11 +27,14 @@
 import PostForm from "@/components/PostForm.vue";
 import PostList from "@/components/PostList.vue";
 import axios from "axios";
+import "1-sep-ui/lib/sep-ui.min.css";
+import {BaseButton} from "1-sep-ui/lib/sep-ui.es.js"
 
 export default {
   components: {
     PostForm,
-    PostList
+    PostList,
+    BaseButton
   },
   data() {
     return {
